@@ -95,63 +95,54 @@ def convert_voice_to_text(audio_file):
     except sr.RequestError:
         return "Error connecting to recognition service."
 
+# 🎤 Record Voice Function# 🎤 Record Voice Function (Updated)
 def record_voice():
-    try:
-        temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-        chunk = 1024
-        sample_format = pyaudio.paInt16
-        channels = 1
-        fs = 44100
-        seconds = 5
-        p = pyaudio.PyAudio()
+    temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    chunk = 1024  
+    sample_format = pyaudio.paInt16  
+    channels = 1
+    fs = 44100  
+    seconds = 5
+    p = pyaudio.PyAudio()
 
-        # 🔍 List all available devices
-        print("\n🔍 Available Audio Devices:")
-        for i in range(p.get_device_count()):
-            info = p.get_device_info_by_index(i)
-            print(f"Device {i}: {info['name']}, Channels: {info['maxInputChannels']}")
+    # 🔍 Find a valid input device
+    device_index = None
+    for i in range(p.get_device_count()):
+        info = p.get_device_info_by_index(i)
+        if info["maxInputChannels"] > 0:
+            device_index = i
+            break  # Use the first valid input device
 
-        # 🎤 Choose valid mic
-        device_index = None
-        for i in range(p.get_device_count()):
-            info = p.get_device_info_by_index(i)
-            if info["maxInputChannels"] > 0:
-                device_index = i
-                print(f"✅ Using Device {i}: {info['name']}")
-                break
-
-        if device_index is None:
-            st.error("⚠️ No valid input device found! Please check your microphone settings.")
-            return None
-
-        # 🎙 Start Recording
-        stream = p.open(format=sample_format, channels=channels, rate=fs, input=True, 
-                        input_device_index=device_index, frames_per_buffer=chunk)
-        frames = []
-
-        for _ in range(0, int(fs / chunk * seconds)):
-            data = stream.read(chunk)
-            frames.append(data)
-
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-
-        # 🔊 Save recorded audio
-        wf = wave.open(temp_audio.name, 'wb')
-        wf.setnchannels(channels)
-        wf.setsampwidth(p.get_sample_size(sample_format))
-        wf.setframerate(fs)
-        wf.writeframes(b''.join(frames))
-        wf.close()
-        
-        print(f"✅ Recording saved: {temp_audio.name}")
-        return temp_audio.name
-    
-    except Exception as e:
-        st.error(f"❌ Error: {e}")
-        print(f"❌ Error: {e}")
+    if device_index is None:
+        st.error("⚠️ No valid input device found! Please check your microphone settings.")
         return None
+
+    try:
+        stream = p.open(format=sample_format, channels=channels, rate=fs, 
+                        input=True, input_device_index=device_index, frames_per_buffer=chunk)
+    except OSError:
+        st.error("⚠️ Could not open the selected input device! Try changing your microphone settings.")
+        return None
+
+    frames = []
+    for _ in range(0, int(fs / chunk * seconds)):
+        data = stream.read(chunk)
+        frames.append(data)
+
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    wf = wave.open(temp_audio.name, 'wb')
+    wf.setnchannels(channels)
+    wf.setsampwidth(p.get_sample_size(sample_format))
+    wf.setframerate(fs)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+    
+    return temp_audio.name
+
+
 # 📝 Extract Handwritten Text
 def extract_text_from_image(image):
     image = image.convert('L')  
@@ -180,9 +171,52 @@ def create_pdf(text):
     pdf.output(pdf_bytes, "F")
     return pdf_bytes.getvalue()
 
+# 📌 Sidebar
+st.sidebar.title("🧠 Laiqely Mind – AI for Smarter Thinking")
+page = st.sidebar.radio("Choose an Option:", ["AI Assistant", "Voice to Text", "Handwritten to Text", "SwapXpert (Data Uploader)"])
 
-#swapxpert function
+# 🤖 AI Assistant
+if page == "AI Assistant":
+    st.title("🤖 AI Assistant")
+    user_query = st.text_input("Ask me anything:")
+    if st.button("Get Answer"):
+        st.write(ai_response(user_query))
 
+# 🎙 Voice to Text
+# 🎙 Voice to Text
+elif page == "Voice to Text":
+    st.title("🎙 Voice to Text Converter")
+    
+    if st.button("Record Voice"):
+        recorded_audio = record_voice()
+        
+        if recorded_audio:  # ✅ Check if a valid file is returned
+            st.success("Recording complete! Now converting to text...")
+            text = convert_voice_to_text(recorded_audio)
+            st.text_area("Converted Text:", value=text, height=150)
+
+            if st.button("Download as PDF"):
+                pdf_bytes = create_pdf(text)
+                st.download_button(label="Download PDF", data=pdf_bytes, file_name="voice_text.pdf", mime="application/pdf")
+        else:
+            st.error("⚠️ Recording failed. Please check your microphone and try again.")
+
+
+# 📝 Handwritten to Text
+elif page == "Handwritten to Text":
+    st.title("📝 Handwritten to Text Converter")
+    uploaded_image = st.file_uploader("Upload handwritten note (JPG/PNG)", type=["jpg", "png"])
+    
+    if uploaded_image and st.button("Extract Text"):
+        image = Image.open(uploaded_image)
+        text = extract_text_from_image(image)
+        st.text_area("Extracted Text:", value=text, height=150)
+
+        if st.button("Download as PDF"):
+            pdf_bytes = create_pdf(text)
+            st.download_button(label="Download PDF", data=pdf_bytes, file_name="handwritten_text.pdf", mime="application/pdf")
+
+# 🔄 SwapXpert (Data Uploader)
 def generate_descriptive_stats(df: pd.DataFrame) -> pd.DataFrame:
     """Generate descriptive statistics for numerical columns."""
     return df.describe()
@@ -300,6 +334,7 @@ def suggest_data_cleaning(df: pd.DataFrame) -> Dict[str, Any]:
     duplicate_count = df.duplicated().sum()
     if duplicate_count > 0:
         suggestions['duplicate_rows'] = int(duplicate_count)
+    
     # Generate general recommendations
     if suggestions['duplicate_rows'] > 0:
         suggestions['recommendations'].append(
@@ -317,81 +352,6 @@ def suggest_data_cleaning(df: pd.DataFrame) -> Dict[str, Any]:
         )
     
     return suggestions
-
-# 📌 Sidebar
-st.sidebar.title("🧠 Laiqely Mind – AI for Smarter Thinking")
-page = st.sidebar.radio("Choose an Option:", ["AI Assistant", "Voice to Text", "Handwritten to Text", "SwapXpert (Data Uploader)"])
-
-# 🤖 AI Assistant
-if page == "AI Assistant":
-    st.title("🤖 AI Assistant")
-    user_query = st.text_input("Ask me anything:")
-    if st.button("Get Answer"):
-        st.write(ai_response(user_query))
-
-# 🎙 Voice to Text
-# 🎙 Voice to Text
-elif page == "Voice to Text":
-    st.title("🎙 Voice to Text Converter")
-    
-    # 📂 File Upload Option (Yeh "Browse File" Button Dubara Add Karega)
-    uploaded_audio = st.file_uploader("Upload an audio file (WAV format)", type=["wav"])
-    
-    if uploaded_audio is not None:
-        st.audio(uploaded_audio, format="audio/wav")  # Play Uploaded Audio
-        st.success("File uploaded! Now converting to text...")
-        text = convert_voice_to_text(uploaded_audio)
-        st.text_area("Converted Text:", value=text, height=150)
-
-        if st.button("Download as PDF"):
-            pdf_bytes = create_pdf(text)
-            st.download_button(label="Download PDF", data=pdf_bytes, file_name="voice_text.pdf", mime="application/pdf")
-
-    # 🎤 Record Voice Option
-    if st.button("Record Voice"):
-        recorded_audio = record_voice()
-        
-        if recorded_audio:
-            st.success("Recording complete! Now converting to text...")
-            text = convert_voice_to_text(recorded_audio)
-            st.text_area("Converted Text:", value=text, height=150)
-
-            if st.button("Download as PDF"):
-                pdf_bytes = create_pdf(text)
-                st.download_button(label="Download PDF", data=pdf_bytes, file_name="voice_text.pdf", mime="application/pdf")
-        else:
-            st.error("⚠️ Recording failed. Please check your microphone and try again.")
-
-    # 📝 Text Input Option
-    text_input = st.text_area("Enter text directly:")
-    if text_input and st.button("Convert to PDF"):
-        pdf_bytes = create_pdf(text_input)
-        st.download_button(label="Download PDF", data=pdf_bytes, file_name="text_to_pdf.pdf", mime="application/pdf")
-
-
-
-
-# 📝 Handwritten to Text
-elif page == "Handwritten to Text":
-    st.title("📝 Handwritten to Text Converter")
-    uploaded_image = st.file_uploader("Upload handwritten note (JPG/PNG)", type=["jpg", "png"])
-    
-    if uploaded_image and st.button("Extract Text"):
-        image = Image.open(uploaded_image)
-        text = extract_text_from_image(image)
-        st.text_area("Extracted Text:", value=text, height=150)
-
-        if st.button("Download as PDF"):
-            pdf_bytes = create_pdf(text)
-            st.download_button(label="Download PDF", data=pdf_bytes, file_name="handwritten_text.pdf", mime="application/pdf")
-
-# 🔄 SwapXpert (Data Uploader)
-elif page == "SwapXpert (Data Uploader)":
-    st.title("🔄 SwapXpert (Data Uploader)")
-
-    # Tumhara poora SwapXpert ka code yahan hona chahiye
-
-    
 
 # Add language support
 LANGUAGES = {
@@ -714,7 +674,7 @@ def main():
 
     st.success(texts['success'])  # Display success message when all files are processed
 
-
+if __name__ == "__main__":
     main()
 
 # 🔚 Footer
