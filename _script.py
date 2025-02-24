@@ -1,20 +1,40 @@
-import streamlit as st
-import speech_recognition as sr
-import pytesseract
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps
-import cv2
-import numpy as np
-from fpdf import FPDF
-from io import BytesIO
-import pyaudio
-import wave
-import tempfile
-import pandas as pd
+# Standard library imports
 import os
-from typing import Dict, Any
-import plotly.express as px
 import platform
-import openpyxl  # noqa: F401 - Required for pandas Excel support
+import tempfile
+import wave
+from io import BytesIO
+from pathlib import Path
+from typing import Dict, Any
+
+# Third-party imports
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import openpyxl
+import pandas as pd
+import plotly.express as px
+import pyaudio
+import pytesseract
+import seaborn as sns
+import speech_recognition as sr
+import streamlit as st
+from fpdf import FPDF
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+
+# Additional imports that might be needed
+import seaborn as sns
+# Initialize workbook and audio settings
+if 'dataframes' not in st.session_state:
+    st.session_state.dataframes = {}
+    st.session_state.workbook = openpyxl.Workbook()
+
+# Audio configuration
+CHUNK = 1024
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
+RECORD_SECONDS = 5
 
 # Define LANGUAGES dictionary at the top
 LANGUAGES = {
@@ -35,6 +55,14 @@ LANGUAGES = {
 # Initialize session state if not exists
 if 'dataframes' not in st.session_state:
     st.session_state.dataframes = {}
+    st.session_state.workbook = openpyxl.Workbook()
+
+# Audio configuration
+CHUNK = 1024
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
+RECORD_SECONDS = 5
 
 # Move these to the top of your file, after the imports and before the main code
 # Language and theme selection in main sidebar
