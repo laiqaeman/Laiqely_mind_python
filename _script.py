@@ -172,47 +172,106 @@ if theme == "Light":
                 border-radius: 4px !important;
                 margin: 4px 0 !important;
             }
+
+            /* Tabs and other navigation elements */
+            .stTabs [data-baseweb="tab-list"] {
+                background-color: #4a5568 !important;
+                border-radius: 4px !important;
+            }
+
+            .stTabs [data-baseweb="tab"] {
+                color: white !important;
+            }
+
+            /* Dropdown menus */
+            .stSelectbox > div > div {
+                background-color: #4a5568 !important;
+                color: white !important;
+            }
+
+            /* Sliders */
+            .stSlider > div > div {
+                background-color: #cc0000 !important;
+            }
+
+            /* Progress bars */
+            .stProgress > div > div > div > div {
+                background-color: #cc0000 !important;
+            }
         </style>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
         <style>
-            .stApp { background-color: #121212; color: white; }
+            .stApp { 
+                background-color: #121212 !important; 
+                color: white !important; 
+            }
+            
             [data-testid="stSidebar"] {
                 background-color: #1a1a1a !important;
                 box-shadow: 3px 3px 10px rgba(255, 0, 0, 0.5);
             }
+            
             .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
                 color: #ff0000 !important;
                 text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.7);
             }
+            
             .stButton>button {
-                background-color: #ff0000;
-                color: white;
-                border-radius: 10px;
-                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7);
+                background-color: #ff0000 !important;
+                color: white !important;
+                border-radius: 10px !important;
+                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7) !important;
             }
+            
             .stButton>button:hover {
-                background-color: #cc0000;
-                box-shadow: 3px 3px 12px rgba(255, 0, 0, 0.9);
+                background-color: #cc0000 !important;
+                box-shadow: 3px 3px 12px rgba(255, 0, 0, 0.9) !important;
             }
-            .stTextInput>div>div>input, .stTextArea>div>textarea {
-                background-color: #222;
-                color: white;
-                border-radius: 8px;
-                border: 1px solid #ff0000;
-                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.6);
+            
+            .stTextInput>div>div>input, 
+            .stTextArea>div>textarea {
+                background-color: #222 !important;
+                color: white !important;
+                border-radius: 8px !important;
+                border: 1px solid #ff0000 !important;
+                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.6) !important;
             }
+            
             .stFileUploader>div>div>input {
-                background-color: #222;
-                color: white;
-                border: 2px solid #ff0000;
-                border-radius: 8px;
-                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7);
+                background-color: #222 !important;
+                color: white !important;
+                border: 2px solid #ff0000 !important;
+                border-radius: 8px !important;
+                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7) !important;
             }
-            .stTable { 
-                border: 1px solid #ff0000;
-                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7);
+            
+            .stDataFrame {
+                background-color: #222 !important;
+                color: white !important;
+                border: 1px solid #ff0000 !important;
+                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7) !important;
+            }
+
+            /* Radio buttons and checkboxes in dark mode */
+            .stRadio > div,
+            .stCheckbox > div {
+                color: white !important;
+            }
+
+            /* Dropdown menus in dark mode */
+            .stSelectbox > div > div {
+                background-color: #222 !important;
+                color: white !important;
+                border: 1px solid #ff0000 !important;
+            }
+
+            /* Success/Error messages in dark mode */
+            .element-container div[data-testid="stMarkdownContainer"] > div {
+                background-color: #222 !important;
+                color: white !important;
+                border: 1px solid #ff0000 !important;
             }
         </style>
     """, unsafe_allow_html=True)
