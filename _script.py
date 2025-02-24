@@ -449,6 +449,33 @@ elif page == "Handwritten to Text":
             )
 
 # 🔄 SwapXpert (Data Uploader)
+
+# SwapXpert section
+if page == "SwapXpert (Data Uploader)":
+    st.markdown("""
+        <style>
+            /* SwapXpert Buttons */
+            .stButton>button, .stDownloadButton>button {
+                background-color: #ff0000 !important;
+                color: white !important;
+                border-radius: 10px !important;
+                box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7) !important;
+                transition: all 0.3s ease !important;
+                border: none !important;
+                padding: 0.5rem 1rem !important;
+                font-weight: bold !important;
+            }
+            
+            .stButton>button:hover, .stDownloadButton>button:hover {
+                background-color: #cc0000 !important;
+                box-shadow: 3px 3px 12px rgba(255, 0, 0, 0.9) !important;
+                transform: translateY(-2px) !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    st.title(texts['title'])
+    # Rest of your SwapXpert code...
 # SwapXpert section
 if page == "SwapXpert (Data Uploader)":
     st.title(texts['title'])
