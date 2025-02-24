@@ -458,36 +458,176 @@ elif page == "Handwritten to Text":
             )
 
 # 🔄 SwapXpert (Data Uploader)
-elif page == "SwapXpert (Data Uploader)":
+# SwapXpert section
+if page == "SwapXpert (Data Uploader)":
     st.title(texts['title'])
     
-    uploaded_files = st.file_uploader(
-        texts['upload_text'],
-        type=["csv", "xlsx"],
-        accept_multiple_files=True
-    )
+    # File upload
+    uploaded_files = st.file_uploader(texts['upload_text'], 
+                                    type=["csv", "xlsx"], 
+                                    accept_multiple_files=True)
     
     if uploaded_files:
         for file in uploaded_files:
-            file_extension = os.path.splitext(file.name)[-1].lower()
-            
             try:
-                if file_extension == ".csv":
+                # Load data
+                if file.name.endswith('.csv'):
                     df = pd.read_csv(file)
-                elif file_extension == ".xlsx":
+                else:
                     df = pd.read_excel(file)
                 
                 st.session_state.dataframes[file.name] = df
-                
                 st.success(f"File {file.name} loaded successfully!")
-                st.write("Preview of the data:")
+                
+                # Data Preview
+                st.subheader("📊 Data Preview")
                 st.dataframe(df.head())
                 
+                # Data Analysis Options
+                st.subheader("🔍 Analysis Options")
+                analysis_type = st.selectbox(
+                    "Choose Analysis Type",
+                    ["Basic Analysis", "Advanced Analysis", "Custom Analysis"]
+                )
+                
+                if analysis_type == "Basic Analysis":
+                    # Basic Statistics
+                    st.write("📈 Statistical Summary:")
+                    st.dataframe(df.describe())
+                    
+                    # Missing Values
+                    st.write("❓ Missing Values:")
+                    missing = df.isnull().sum()
+                    st.dataframe(missing[missing > 0])
+                    
+                    # Data Types
+                    st.write("📋 Data Types:")
+                    st.dataframe(df.dtypes)
+                
+                elif analysis_type == "Advanced Analysis":
+                    # Correlation Matrix
+                    st.write("🔄 Correlation Matrix:")
+                    numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns
+                    if len(numeric_cols) > 0:
+                        corr = df[numeric_cols].corr()
+                        fig = px.imshow(corr, color_continuous_scale='RdBu')
+                        st.plotly_chart(fig)
+                    
+                    # Distribution Plots
+                    st.write("📊 Distribution Plots:")
+                    selected_col = st.selectbox("Select Column for Distribution", numeric_cols)
+                    fig = px.histogram(df, x=selected_col)
+                    st.plotly_chart(fig)
+                
+                elif analysis_type == "Custom Analysis":
+                    # Column Selection
+                    selected_cols = st.multiselect("Select Columns for Analysis", df.columns)
+                    if selected_cols:
+                        st.write("📊 Selected Columns Preview:")
+                        st.dataframe(df[selected_cols])
+                        
+                        # Custom Statistics
+                        st.write("📈 Custom Statistics:")
+                        st.dataframe(df[selected_cols].describe())
+                        
+                        # Custom Plots
+                        if len(selected_cols) >= 2:
+                            st.write("🔄 Scatter Plot:")
+                            x_col = st.selectbox("Select X-axis", selected_cols)
+                            y_col = st.selectbox("Select Y-axis", [col for col in selected_cols if col != x_col])
+                            fig = px.scatter(df, x=x_col, y=y_col)
+                            st.plotly_chart(fig)
+                
+                # Data Cleaning Options
+                st.subheader("🧹 Data Cleaning")
+                cleaning_options = st.multiselect(
+                    "Select Cleaning Operations",
+                    ["Remove Missing Values", "Fill Missing Values", "Remove Duplicates", "Convert Data Types"]
+                )
+                
+                if cleaning_options:
+                    if "Remove Missing Values" in cleaning_options:
+                        df = df.dropna()
+                        st.success("Removed missing values")
+                    
+                    if "Fill Missing Values" in cleaning_options:
+                        fill_method = st.selectbox(
+                            "Choose Fill Method",
+                            ["Mean", "Median", "Mode", "Custom Value"]
+                        )
+                        if fill_method == "Custom Value":
+                            fill_value = st.text_input("Enter fill value")
+                            df = df.fillna(fill_value)
+                        else:
+                            for col in df.select_dtypes(include=['int64', 'float64']):
+                                if fill_method == "Mean":
+                                    df[col] = df[col].fillna(df[col].mean())
+                                elif fill_method == "Median":
+                                    df[col] = df[col].fillna(df[col].median())
+                                elif fill_method == "Mode":
+                                    df[col] = df[col].fillna(df[col].mode()[0])
+                        st.success("Filled missing values")
+                    
+                    if "Remove Duplicates" in cleaning_options:
+                        df = df.drop_duplicates()
+                        st.success("Removed duplicates")
+                    
+                    if "Convert Data Types" in cleaning_options:
+                        for col in df.columns:
+                            new_type = st.selectbox(
+                                f"Convert {col} to:",
+                                ["Keep Current", "Integer", "Float", "String", "DateTime"]
+                            )
+                            if new_type != "Keep Current":
+                                try:
+                                    if new_type == "Integer":
+                                        df[col] = df[col].astype(int)
+                                    elif new_type == "Float":
+                                        df[col] = df[col].astype(float)
+                                    elif new_type == "String":
+                                        df[col] = df[col].astype(str)
+                                    elif new_type == "DateTime":
+                                        df[col] = pd.to_datetime(df[col])
+                                except Exception as e:
+                                    st.error(f"Error converting {col}: {str(e)}")
+                
+                # Download Options
+                st.subheader("💾 Download Options")
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    csv = df.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        "Download CSV",
+                        csv,
+                        f"{file.name.split('.')[0]}_processed.csv",
+                        "text/csv"
+                    )
+                
+                with col2:
+                    buffer = BytesIO()
+                    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                        df.to_excel(writer, index=False)
+                    st.download_button(
+                        "Download Excel",
+                        buffer.getvalue(),
+                        f"{file.name.split('.')[0]}_processed.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                
+                with col3:
+                    summary_buffer = BytesIO()
+                    with pd.ExcelWriter(summary_buffer, engine='openpyxl') as writer:
+                        df.describe().to_excel(writer)
+                    st.download_button(
+                        "Download Summary",
+                        summary_buffer.getvalue(),
+                        f"{file.name.split('.')[0]}_summary.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                
             except Exception as e:
-                st.error(f"Error loading file {file.name}: {str(e)}")
-
-    st.success(texts['success'])  # Display success message when all files are processed
-
+                st.error(f"Error processing file {file.name}: {str(e)}")
 # 🔚 Footer
 st.write("---")
 st.write("🚀 Built with Streamlit | By Laiqa Eman")
