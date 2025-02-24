@@ -474,7 +474,7 @@ if page == "SwapXpert (Data Uploader)":
         </style>
     """, unsafe_allow_html=True)
     
-    st.title(texts['title'])
+ 
     # Rest of your SwapXpert code...
 # SwapXpert section
 if page == "SwapXpert (Data Uploader)":
