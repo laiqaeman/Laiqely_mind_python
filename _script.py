@@ -9,7 +9,6 @@ from typing import Dict, Any
 
 # Third-party imports
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import openpyxl
 import pandas as pd
@@ -22,8 +21,6 @@ import streamlit as st
 from fpdf import FPDF
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
-# Additional imports that might be needed
-import seaborn as sns
 # Initialize workbook and audio settings
 if 'dataframes' not in st.session_state:
     st.session_state.dataframes = {}
