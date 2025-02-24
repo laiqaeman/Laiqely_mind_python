@@ -153,33 +153,25 @@ if theme == "Light":
 else:
     st.markdown("""
         <style>
-            .stApp { 
-                background-color: #121212 !important; 
-                color: white !important; 
-            }
-            
+            .stApp { background-color: #121212; color: white; }
             [data-testid="stSidebar"] {
                 background-color: #1a1a1a !important;
                 box-shadow: 3px 3px 10px rgba(255, 0, 0, 0.5);
             }
-            
             .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
                 color: #ff0000 !important;
                 text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.7);
             }
-            
             .stButton>button {
                 background-color: #ff0000 !important;
                 color: white !important;
                 border-radius: 10px !important;
                 box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7) !important;
             }
-            
             .stButton>button:hover {
                 background-color: #cc0000 !important;
                 box-shadow: 3px 3px 12px rgba(255, 0, 0, 0.9) !important;
             }
-            
             .stTextInput>div>div>input, 
             .stTextArea>div>textarea {
                 background-color: #222 !important;
@@ -188,7 +180,6 @@ else:
                 border: 1px solid #ff0000 !important;
                 box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.6) !important;
             }
-            
             .stFileUploader>div>div>input {
                 background-color: #222 !important;
                 color: white !important;
@@ -196,7 +187,6 @@ else:
                 border-radius: 8px !important;
                 box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7) !important;
             }
-            
             .stDataFrame {
                 background-color: #222 !important;
                 color: white !important;
@@ -204,8 +194,9 @@ else:
                 box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7) !important;
             }
         </style>
-    """, unsafe_allow_html=True)
-    # Page selection (move this after theme selection)
+        """, unsafe_allow_html=True)
+
+# Page selection (move this after theme selection)
 page = st.sidebar.radio("Choose an Option:", [
     "SwapXpert (Data Uploader)",
     "AI Assistant",
