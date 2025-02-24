@@ -69,6 +69,7 @@ language = st.sidebar.selectbox("Select Language", list(LANGUAGES.keys()))
 texts = LANGUAGES[language]
 
 # Theme selection
+# Theme selection
 theme = st.sidebar.radio("Theme", ["Dark", "Light"])
 if theme == "Light":
     st.markdown("""
@@ -147,53 +148,6 @@ if theme == "Light":
                 border-radius: 4px !important;
                 border: 1px solid #cc0000 !important;
             }
-            
-            .stDataFrame td, 
-            .stDataFrame th {
-                color: white !important;
-                border: 1px solid #cc0000 !important;
-            }
-
-            /* Radio buttons and checkboxes */
-            .stRadio > div,
-            .stCheckbox > div {
-                color: white !important;
-            }
-
-            /* Success/Error messages */
-            .element-container div[data-testid="stMarkdownContainer"] > div {
-                background-color: #4a5568 !important;
-                color: white !important;
-                padding: 8px !important;
-                border-radius: 4px !important;
-                margin: 4px 0 !important;
-            }
-
-            /* Tabs and other navigation elements */
-            .stTabs [data-baseweb="tab-list"] {
-                background-color: #4a5568 !important;
-                border-radius: 4px !important;
-            }
-
-            .stTabs [data-baseweb="tab"] {
-                color: white !important;
-            }
-
-            /* Dropdown menus */
-            .stSelectbox > div > div {
-                background-color: #4a5568 !important;
-                color: white !important;
-            }
-
-            /* Sliders */
-            .stSlider > div > div {
-                background-color: #cc0000 !important;
-            }
-
-            /* Progress bars */
-            .stProgress > div > div > div > div {
-                background-color: #cc0000 !important;
-            }
         </style>
     """, unsafe_allow_html=True)
 else:
@@ -249,30 +203,9 @@ else:
                 border: 1px solid #ff0000 !important;
                 box-shadow: 2px 2px 8px rgba(255, 0, 0, 0.7) !important;
             }
-
-            /* Radio buttons and checkboxes in dark mode */
-            .stRadio > div,
-            .stCheckbox > div {
-                color: white !important;
-            }
-
-            /* Dropdown menus in dark mode */
-            .stSelectbox > div > div {
-                background-color: #222 !important;
-                color: white !important;
-                border: 1px solid #ff0000 !important;
-            }
-
-            /* Success/Error messages in dark mode */
-            .element-container div[data-testid="stMarkdownContainer"] > div {
-                background-color: #222 !important;
-                color: white !important;
-                border: 1px solid #ff0000 !important;
-            }
         </style>
     """, unsafe_allow_html=True)
-
-# Page selection (move this after theme selection)
+    # Page selection (move this after theme selection)
 page = st.sidebar.radio("Choose an Option:", [
     "SwapXpert (Data Uploader)",
     "AI Assistant",
