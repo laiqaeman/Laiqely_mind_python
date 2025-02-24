@@ -14,6 +14,7 @@ import os
 from typing import Dict, Any
 import plotly.express as px
 import platform
+import openpyxl  # noqa: F401 - Required for pandas Excel support
 
 # Define LANGUAGES dictionary at the top
 LANGUAGES = {
