@@ -13,6 +13,7 @@ import pandas as pd
 import os
 from typing import Dict, Any
 import plotly.express as px
+import platform
 
 # Define LANGUAGES dictionary at the top
 LANGUAGES = {
@@ -245,12 +246,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-# Configure Tesseract path with error handling
-try:
+# Tesseract configuration
+if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-except Exception as e:
-    st.error("Tesseract OCR is not properly configured. Please install Tesseract OCR and set the correct path.")
+else:
+    # For Linux/Cloud deployment
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 # 🎤 AI Assistant Function
 def ai_response(user_input):
@@ -353,21 +354,35 @@ def record_voice():
 
 # 📝 Extract Handwritten Text
 def extract_text_from_image(image):
-    image = image.convert('L')  
-    image = ImageOps.invert(image)  
-    image = image.filter(ImageFilter.MedianFilter())  
-    enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(2)  
+    try:
+        image = image.convert('L')
+        image = ImageOps.invert(image)
+        image = image.filter(ImageFilter.MedianFilter())
+        enhancer = ImageEnhance.Contrast(image)
+        image = enhancer.enhance(2)
 
-    open_cv_image = np.array(image)
-    if open_cv_image.ndim == 2:
-        processed_image = open_cv_image
-    else:
-        processed_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2GRAY)
+        open_cv_image = np.array(image)
+        if open_cv_image.ndim == 2:
+            processed_image = open_cv_image
+        else:
+            processed_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2GRAY)
 
-    processed_image = cv2.adaptiveThreshold(processed_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-    
-    return pytesseract.image_to_string(Image.fromarray(processed_image))
+        processed_image = cv2.adaptiveThreshold(
+            processed_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+        )
+        
+        try:
+            text = pytesseract.image_to_string(Image.fromarray(processed_image))
+            if not text.strip():
+                return "No text detected. Please try with a clearer image."
+            return text
+        except Exception as e:
+            st.error(f"Error in text extraction: {str(e)}")
+            return "Error in processing the image. Please try again."
+            
+    except Exception as e:
+        st.error(f"Error in image processing: {str(e)}")
+        return "Error in processing the image. Please try again."
 
 # 📄 Create PDF Function
 def create_pdf(text):
