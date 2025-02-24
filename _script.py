@@ -562,3 +562,4 @@ def create_download_link(df, format_type):
         mime_type = 'application/json'
         file_ext = '.json'
     return buffer, mime_type, file_ext
+    
